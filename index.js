@@ -6,7 +6,13 @@ import admin from "firebase-admin";
 
 
 const app = express();
-app.use(cors()); // 👈 allow requests from your frontend
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 // Initialize Firebase Admin SDK
