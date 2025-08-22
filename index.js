@@ -6,8 +6,7 @@ import "dotenv/config";
 
 
 const app = express();
-app.use(cors()); // 👈 allow requests from your frontend
-app.use(express.json());
+app.use(cors({ origin: "*" }));app.use(express.json());
 admin.initializeApp({
   credential: admin.credential.cert({
     projectId: process.env.FIREBASE_PROJECT_ID,
