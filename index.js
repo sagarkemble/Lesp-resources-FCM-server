@@ -6,13 +6,7 @@ import admin from "firebase-admin";
 
 
 const app = express();
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors()); // 👈 allow requests from your frontend
 app.use(express.json());
 
 // Initialize Firebase Admin SDK
@@ -27,6 +21,7 @@ app.post("/subscribe", async (req, res) => {
     console.log(`Successfully subscribed to topic: ${topic}`);
     res.json({ success: true, response });
   } catch (error) {
+    console.log(`Error subscribing to topic: ${topic}`, error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -45,9 +40,9 @@ app.post("/send", async (req, res) => {
 
   try {
     const response = await admin.messaging().send(message);
-    console.log(`Successfully sent message to topic: ${topic}`);
     res.json({ success: true, response });
   } catch (error) {
+    console.log(`Error sending message to topic: ${topic}`, error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
