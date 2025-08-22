@@ -9,9 +9,12 @@ const app = express();
 app.use(cors()); // 👈 allow requests from your frontend
 app.use(express.json());
 
-// Initialize Firebase Admin SDK
+
 admin.initializeApp({
-  credential: admin.credential.cert("./serviceAccountKey.json"), // download from Firebase Console
+
+    // string ✅
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,  // string ✅
+  
 });
 
 app.post("/subscribe", async (req, res) => {
