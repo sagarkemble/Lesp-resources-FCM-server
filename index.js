@@ -2,19 +2,18 @@
 import express from "express";
 import cors from "cors";
 import admin from "firebase-admin";
-
+import "dotenv/config"; 
 
 
 const app = express();
 app.use(cors()); // 👈 allow requests from your frontend
 app.use(express.json());
-
-
 admin.initializeApp({
-
-    // string ✅
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,  // string ✅
-  
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  }),
 });
 
 app.post("/subscribe", async (req, res) => {
