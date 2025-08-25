@@ -16,13 +16,11 @@ admin.initializeApp({
 });
 // Subscribe to a topic
 app.post("/subscribe", async (req, res) => {
-  console.log("entered");
-
   const { token, topic } = req.body;
   try {
     const response = await admin.messaging().subscribeToTopic(token, topic);
     console.log(response);
-    console.log(`Successfully subscribed to topic: ${topic}`);
+    console.log(`Successfully subscribed ${token} to topic: ${topic}`);
     res.json({ success: true, response });
   } catch (error) {
     console.log(`Error subscribing to topic: ${topic}`, error);
@@ -32,7 +30,6 @@ app.post("/subscribe", async (req, res) => {
 // Send notification to a topic
 app.post("/send", async (req, res) => {
   const { topic, title, body } = req.body;
-
   const message = {
     notification: {
       title,
