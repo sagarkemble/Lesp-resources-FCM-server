@@ -29,23 +29,27 @@ app.post("/subscribe", async (req, res) => {
 });
 // Send notification to a topic
 app.post("/send", async (req, res) => {
-  const { topic, title, body } = req.body;
-  const message = {
-    notification: {
-      title,
-      body,
-    },
-    topic,
-  };
+  const { topics, title, body } = req.body; // `topics` is an array
+  const results = [];
 
-  try {
-    const response = await admin.messaging().send(message);
-    res.json({ success: true, response });
-  } catch (error) {
-    console.log(`Error sending message to topic: ${topic}`, error);
-    res.status(500).json({ success: false, error: error.message });
+  for (const topic of topics) {
+    const message = {
+      notification: { title, body },
+      topic,
+    };
+
+    try {
+      const response = await admin.messaging().send(message);
+      results.push({ topic, success: true, response });
+    } catch (error) {
+      console.log(`Error sending message to topic: ${topic}`, error);
+      results.push({ topic, success: false, error: error.message });
+    }
   }
+
+  res.json(results);
 });
+
 // unsubscribe from a topic
 app.post("/unsubscribe", express.text({ type: "*/*" }), async (req, res) => {
   const { token, topic } = JSON.parse(req.body);
