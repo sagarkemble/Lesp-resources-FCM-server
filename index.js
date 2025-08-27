@@ -34,6 +34,14 @@ app.post("/send", async (req, res) => {
     notification: {
       title,
       body,
+      icon: "https://ik.imagekit.io/yn9gz2n2g/others/favicon.png?updatedAt=1756303018879", // Add this
+    },
+    webpush: {
+      notification: {
+        icon: "https://ik.imagekit.io/yn9gz2n2g/others/favicon.png?updatedAt=1756303018879",
+        badge:
+          "https://ik.imagekit.io/yn9gz2n2g/others/favicon.png?updatedAt=1756303018879",
+      },
     },
     topic,
   };
