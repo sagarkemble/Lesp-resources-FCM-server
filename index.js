@@ -16,30 +16,50 @@ admin.initializeApp({
 });
 // Subscribe to a topic
 app.post("/subscribe", async (req, res) => {
-  const { token, topic } = req.body;
+  const { token, topics } = req.body;
+  if (!token || !Array.isArray(topics)) {
+    console.log("invalid type");
+    return res.status(400).json({ success: false, error: "Invalid input" });
+  }
   try {
-    const response = await admin.messaging().subscribeToTopic(token, topic);
-    console.log(response);
-    console.log(`Successfully subscribed ${token} to topic: ${topic}`);
-    res.json({ success: true, response });
+    let results = [];
+
+    for (const topic of topics) {
+      try {
+        const response = await admin.messaging().subscribeToTopic(token, topic);
+        console.log(`Successfully subscribed ${token} to topic: ${topic}`);
+        results.push({ topic, success: true, response });
+      } catch (err) {
+        console.log(`Error subscribing ${token} to topic: ${topic}`, err);
+        results.push({ topic, success: false, error: err.message });
+      }
+    }
+
+    res.json({ success: true, results });
   } catch (error) {
-    console.log(`Error subscribing to topic: ${topic}`, error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 // Send notification to a topic
 app.post("/send", async (req, res) => {
-  const { topics, title, body } = req.body; // `topics` is an array
+  const { topics, title, body } = req.body;
   const results = [];
-
   for (const topic of topics) {
     const message = {
-      notification: { title, body },
+      data: { title, body },
+      // webpush: {
+      //   notification: {
+      //     icon: "https://ik.imagekit.io/yn9gz2n2g/others/favicon.png",
+      //     badge: "https://ik.imagekit.io/yn9gz2n2g/others/notificationIcon.png",
+      //   },
+      // },
       topic,
     };
 
     try {
       const response = await admin.messaging().send(message);
+      console.log(`Successfully sent message to topic: ${topic}`, response);
       results.push({ topic, success: true, response });
     } catch (error) {
       console.log(`Error sending message to topic: ${topic}`, error);
@@ -51,16 +71,69 @@ app.post("/send", async (req, res) => {
 });
 
 // unsubscribe from a topic
-app.post("/unsubscribe", express.text({ type: "*/*" }), async (req, res) => {
-  const { token, topic } = JSON.parse(req.body);
+app.use(
+  "/unsubscribe",
+  express.text({ type: "text/plain" }),
+  (req, res, next) => {
+    if (req.body && typeof req.body === "string") {
+      try {
+        req.body = JSON.parse(req.body);
+      } catch (e) {
+        return res.status(400).json({ success: false, error: "Invalid JSON" });
+      }
+    }
+    next();
+  }
+);
+app.post("/unsubscribe", async (req, res) => {
+  const { token, topics } = req.body;
+  if (!token) {
+    return res.status(400).json({ success: false, error: "Token is required" });
+  }
+
+  if (!topics || !Array.isArray(topics) || topics.length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, error: "Topics must be a non-empty array" });
+  }
+
   try {
-    await admin.messaging().unsubscribeFromTopic(token, topic);
-    console.log(`Unsubscribed token from ${topic}`);
-    res.json({ success: true });
+    let results = [];
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const topic of topics) {
+      try {
+        const response = await admin
+          .messaging()
+          .unsubscribeFromTopic(token, topic);
+        console.log(`Unsubscribed ${token} from topic: ${topic}`);
+        results.push({ topic, success: true, response });
+        successCount++;
+      } catch (err) {
+        console.error(`Error unsubscribing ${token} from topic: ${topic}`, err);
+        results.push({ topic, success: false, error: err.message });
+        errorCount++;
+      }
+    }
+
+    res.json({
+      success: true,
+      results,
+      summary: {
+        total: topics.length,
+        successful: successCount,
+        failed: errorCount,
+      },
+    });
   } catch (error) {
     console.error("Unsubscribe error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// app.listen(3000, () => {
+//   console.log("Server is running on port 3000");
+// });
 
 export default app;
