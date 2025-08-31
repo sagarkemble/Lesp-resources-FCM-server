@@ -79,6 +79,7 @@ app.use(
       try {
         req.body = JSON.parse(req.body);
       } catch (e) {
+        console.error("Error parsing JSON:", e);
         return res.status(400).json({ success: false, error: "Invalid JSON" });
       }
     }
@@ -88,10 +89,12 @@ app.use(
 app.post("/unsubscribe", async (req, res) => {
   const { token, topics } = req.body;
   if (!token) {
+    console.error("Token is required");
     return res.status(400).json({ success: false, error: "Token is required" });
   }
 
   if (!topics || !Array.isArray(topics) || topics.length === 0) {
+    console.error("Topics must be a non-empty array");
     return res
       .status(400)
       .json({ success: false, error: "Topics must be a non-empty array" });
