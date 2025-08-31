@@ -5,7 +5,16 @@ import admin from "firebase-admin";
 import "dotenv/config";
 
 const app = express();
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: ["https://www.lespresources.in", "http://localhost:5173"],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+app.options("/unsubscribe", cors());
 app.use(express.json());
 admin.initializeApp({
   credential: admin.credential.cert({
