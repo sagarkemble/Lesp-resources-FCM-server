@@ -48,12 +48,6 @@ app.post("/send", async (req, res) => {
   for (const topic of topics) {
     const message = {
       data: { title, body },
-      // webpush: {
-      //   notification: {
-      //     icon: "https://ik.imagekit.io/yn9gz2n2g/others/favicon.png",
-      //     badge: "https://ik.imagekit.io/yn9gz2n2g/others/notificationIcon.png",
-      //   },
-      // },
       topic,
     };
 
