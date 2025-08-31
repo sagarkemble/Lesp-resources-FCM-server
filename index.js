@@ -71,21 +71,13 @@ app.post("/send", async (req, res) => {
 });
 
 // unsubscribe from a topic
-app.use(
-  "/unsubscribe",
-  express.text({ type: "text/plain" }),
-  (req, res, next) => {
-    if (req.body && typeof req.body === "string") {
-      try {
-        req.body = JSON.parse(req.body);
-      } catch (e) {
-        console.error("Error parsing JSON:", e);
-        return res.status(400).json({ success: false, error: "Invalid JSON" });
-      }
-    }
-    next();
+app.use("/unsubscribe", express.json(), (req, res, next) => {
+  if (!req.body || typeof req.body !== "object") {
+    return res.status(400).json({ success: false, error: "Invalid JSON" });
   }
-);
+  next();
+});
+
 app.post("/unsubscribe", async (req, res) => {
   const { token, topics } = req.body;
   if (!token) {
